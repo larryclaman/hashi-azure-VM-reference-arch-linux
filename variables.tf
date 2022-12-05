@@ -11,7 +11,7 @@ variable "resource_group_location" {
 }
 
 variable "resource_group_name_prefix" {
-  default     = "tf"
+  default     = "tfdemo"
   description = "Prefix of the resource group name that's combined with a random ID so name is unique in your Azure subscription."
 }
 
@@ -69,4 +69,12 @@ variable "dbname" {
   description = "Name of SQL Server db"
   default     = "mydb"
 
+}
+
+variable "web_image" {
+  description = "uri of container image used in web tier"
+}
+
+variable "api_image" {
+  description = "uri of container image used in api tier"
 }

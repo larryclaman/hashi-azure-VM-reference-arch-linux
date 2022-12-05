@@ -44,7 +44,7 @@ resource "random_password" "dbpassword" {
 
 resource "azurerm_resource_group" "rg" {
   location = var.resource_group_location
-  name     = "${random_pet.name.id}.rg"
+  name     = random_pet.name.id
 }
 
 ######################################
@@ -100,40 +100,45 @@ module "load_balancer" {
 # Create web scale set
 ######################################
 
-module "web_scale_sets" {
-  source                   = "./modules/web_scale_set"
-  name                     = random_pet.name.id
-  resource_group_location  = var.resource_group_location
+module "web-vmss" {
+  source                   = "./modules/vmss"
+  name                     = "${random_pet.name.id}-web"
+  location  = var.resource_group_location
   resource_group_name      = azurerm_resource_group.rg.name
   scale_set_sub            = module.networks.subnet3
+  type = "web"
   app_gty_backend_pool_ids = module.app-gateway.app_gateway.backend_address_pool[*].id
   admin_user               = var.admin_user
   admin_password           = random_password.password.bcrypt_hash
   # app provisioning
-  web_image      = "erjosito/yadaweb:1.0"
-  api_private_ip = module.load_balancer.mid_tier_lb.private_ip_address
+  custom_data = base64encode(templatefile("app/webinit.tmpl", {
+     api_private_ip = module.load_balancer.mid_tier_lb.private_ip_address,
+     web_image      = var.web_image
+     }
+    ) )
 }
 
 ######################################
 # Create biz scale set
 ######################################
-
-module "biz_scale_sets" {
-  source                  = "./modules/biz_scale_set"
-  name                    = random_pet.name.id
-  resource_group_location = var.resource_group_location
-  resource_group_name     = azurerm_resource_group.rg.name
-  scale_set_sub           = module.networks.subnet4
+module "api-vmss" {
+  source                   = "./modules/vmss"
+  name                     = "${random_pet.name.id}-api"
+  location  = var.resource_group_location
+  resource_group_name      = azurerm_resource_group.rg.name
+  scale_set_sub            = module.networks.subnet4
+  type = "api"
   lb_backend_pool_ids     = module.load_balancer.lb_pool_ids
-  admin_user              = var.admin_user
-  admin_password          = random_password.password.bcrypt_hash
+  admin_user               = var.admin_user
+  admin_password           = random_password.password.bcrypt_hash
   # app provisioning
-  api_image           = "erjosito/yadaapi:1.0"
-  SQL_SERVER_FQDN     = module.db_SQLSERVER.sqlserver-fqdn
-  SQL_SERVER_USERNAME = var.sqladmin
-  SQL_SERVER_PASSWORD = random_password.dbpassword.result
-
-
+  custom_data = base64encode(templatefile("app/apiinit.tmpl", {
+    api_image = var.api_image,
+   sql_server_fqdn     = module.db_SQLSERVER.sqlserver-fqdn ,
+   sql_username = var.sqladmin ,
+   sql_password = random_password.dbpassword.result 
+     }
+    ) )
 }
 
 ######################################
