@@ -89,7 +89,7 @@ module "app-gateway" {
   name                    = random_pet.name.id
   resource_group_location = var.resource_group_location
   resource_group_name     = azurerm_resource_group.rg.name
-  app_gtw_sub             = module.networks.subnet1
+  app_gtw_sub             = module.networks.subnet-appgtw
   app_gtw_ip              = module.networks.app-gtw-ip
 }
 
@@ -102,7 +102,7 @@ module "load_balancer" {
   name                    = random_pet.name.id
   resource_group_location = var.resource_group_location
   resource_group_name     = azurerm_resource_group.rg.name
-  lb_sub                  = module.networks.subnet3
+  lb_sub                  = module.networks.subnet-web
 }
 
 ######################################
@@ -114,7 +114,7 @@ module "web-vmss" {
   name                     = "${random_pet.name.id}-web"
   location                 = var.resource_group_location
   resource_group_name      = azurerm_resource_group.rg.name
-  scale_set_sub            = module.networks.subnet3
+  scale_set_sub            = module.networks.subnet-web
   type                     = "web"
   app_gty_backend_pool_ids = module.app-gateway.app_gateway.backend_address_pool[*].id
   admin_user               = var.admin_user
@@ -135,7 +135,7 @@ module "api-vmss" {
   name                = "${random_pet.name.id}-api"
   location            = var.resource_group_location
   resource_group_name = azurerm_resource_group.rg.name
-  scale_set_sub       = module.networks.subnet4
+  scale_set_sub       = module.networks.subnet-api
   type                = "api"
   lb_backend_pool_ids = module.load_balancer.lb_pool_ids
   admin_user          = var.admin_user
@@ -159,7 +159,7 @@ module "api-vmss" {
 #   resource_group_location = var.resource_group_location
 #   resource_group_name     = azurerm_resource_group.rg.name
 #   throughput              = 400
-#   data_tier_sub_id        = module.networks.subnet5
+#   data_tier_sub_id        = module.networks.subnet-data
 #   ip_range_filter         = "0.0.0.0"
 # }
 module "db_SQLSERVER" {

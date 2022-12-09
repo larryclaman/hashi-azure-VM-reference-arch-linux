@@ -18,8 +18,8 @@ resource "azurerm_public_ip" "app-gateway" {
 ######################################
 # Create Security Groups and Rules
 ######################################
-resource "azurerm_network_security_group" "SecurityGroup" {
-  name                = "${var.name}-SecurityGroup"
+resource "azurerm_network_security_group" "appgw" {
+  name                = "${var.name}-SecurityGroup-appgw"
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
 
@@ -36,13 +36,10 @@ resource "azurerm_network_security_group" "SecurityGroup" {
     destination_address_prefix = "*"
   }
 
-  tags = {
-    environment = "Terraform"
-  }
 }
 
-resource "azurerm_network_security_group" "SecurityGroup1" {
-  name                = "${var.name}-SecurityGroup1"
+resource "azurerm_network_security_group" "mgmt" {
+  name                = "${var.name}-SecurityGroup-mgmt"
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
 
@@ -59,13 +56,11 @@ resource "azurerm_network_security_group" "SecurityGroup1" {
     destination_address_prefix = "*"
   }
 
-  tags = {
-    environment = "Terraform"
-  }
+
 }
 
-resource "azurerm_network_security_group" "SecurityGroup2" {
-  name                = "${var.name}-SecurityGroup2"
+resource "azurerm_network_security_group" "web" {
+  name                = "${var.name}-SecurityGroup-web"
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
 
@@ -82,13 +77,10 @@ resource "azurerm_network_security_group" "SecurityGroup2" {
     destination_address_prefix = "*"
   }
 
-  tags = {
-    environment = "Terraform"
-  }
 }
 
-resource "azurerm_network_security_group" "SecurityGroup3" {
-  name                = "${var.name}-SecurityGroup3"
+resource "azurerm_network_security_group" "api" {
+  name                = "${var.name}-SecurityGroup-api"
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
 
@@ -105,13 +97,11 @@ resource "azurerm_network_security_group" "SecurityGroup3" {
     destination_address_prefix = "*"
   }
 
-  tags = {
-    environment = "Terraform"
-  }
+
 }
 
-resource "azurerm_network_security_group" "SecurityGroup4" {
-  name                = "${var.name}-SecurityGroup4"
+resource "azurerm_network_security_group" "data" {
+  name                = "${var.name}-SecurityGroup-data"
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
 
@@ -128,9 +118,6 @@ resource "azurerm_network_security_group" "SecurityGroup4" {
     destination_address_prefix = "*"
   }
 
-  tags = {
-    environment = "Terraform"
-  }
 }
 
 
@@ -145,9 +132,7 @@ resource "azurerm_virtual_network" "vm-ref-arch" {
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
   address_space       = ["10.0.0.0/16"]
-  tags = {
-    environment = "Terraform"
-  }
+
 }
 
 resource "azurerm_subnet" "app_gateway_sub" {
@@ -191,23 +176,23 @@ resource "azurerm_subnet" "data_tier_sub" {
 
 resource "azurerm_subnet_network_security_group_association" "SGA" {
   subnet_id                 = azurerm_subnet.app_gateway_sub.id
-  network_security_group_id = azurerm_network_security_group.SecurityGroup.id
+  network_security_group_id = azurerm_network_security_group.appgw.id
 }
 resource "azurerm_subnet_network_security_group_association" "SGA1" {
   subnet_id                 = azurerm_subnet.mgmt_sub.id
-  network_security_group_id = azurerm_network_security_group.SecurityGroup1.id
+  network_security_group_id = azurerm_network_security_group.mgmt.id
 }
 resource "azurerm_subnet_network_security_group_association" "SGA2" {
   subnet_id                 = azurerm_subnet.web_tier_sub.id
-  network_security_group_id = azurerm_network_security_group.SecurityGroup2.id
+  network_security_group_id = azurerm_network_security_group.web.id
 }
 resource "azurerm_subnet_network_security_group_association" "SGA3" {
   subnet_id                 = azurerm_subnet.biz_tier_sub.id
-  network_security_group_id = azurerm_network_security_group.SecurityGroup3.id
+  network_security_group_id = azurerm_network_security_group.api.id
 }
 resource "azurerm_subnet_network_security_group_association" "SGA4" {
   subnet_id                 = azurerm_subnet.data_tier_sub.id
-  network_security_group_id = azurerm_network_security_group.SecurityGroup4.id
+  network_security_group_id = azurerm_network_security_group.data.id
 }
 
 ######################################

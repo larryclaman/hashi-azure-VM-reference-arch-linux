@@ -2,20 +2,20 @@ output "Net-vm-ref-arch" {
   value = azurerm_virtual_network.vm-ref-arch
 }
 
-output "subnet1" {
+output "subnet-appgtw" {
   value = azurerm_subnet.app_gateway_sub.id
 }
 
-output "subnet2" {
+output "subnet-mgmt" {
   value = azurerm_subnet.mgmt_sub.id
 }
 
-output "subnet3" {
+output "subnet-web" {
   value = azurerm_subnet.web_tier_sub.id
 }
 
 
-output "subnet4" {
+output "subnet-api" {
   value = azurerm_subnet.biz_tier_sub.id
 }
 
@@ -25,28 +25,28 @@ output "api-subnet" {
   value = azurerm_subnet.biz_tier_sub.id
 }
 
-output "subnet5" {
+output "subnet-data" {
   value = azurerm_subnet.data_tier_sub.id
 }
 
-output "app-nsg" {
-  value = azurerm_network_security_group.SecurityGroup
+output "appgw-nsg" {
+  value = azurerm_network_security_group.appgw
 }
 
 output "mgmt-nsg" {
-  value = azurerm_network_security_group.SecurityGroup1
+  value = azurerm_network_security_group.mgmt
 }
 
 output "web-nsg" {
-  value = azurerm_network_security_group.SecurityGroup2
+  value = azurerm_network_security_group.web
 }
 
-output "biz-nsg" {
-  value = azurerm_network_security_group.SecurityGroup3
+output "api-nsg" {
+  value = azurerm_network_security_group.api
 }
 
 output "data-nsg" {
-  value = azurerm_network_security_group.SecurityGroup4
+  value = azurerm_network_security_group.data
 }
 
 output "app-gtw-ip" {
