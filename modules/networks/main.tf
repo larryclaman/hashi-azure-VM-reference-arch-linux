@@ -174,23 +174,23 @@ resource "azurerm_subnet" "data_tier_sub" {
   service_endpoints    = ["Microsoft.AzureCosmosDB"]
 }
 
-resource "azurerm_subnet_network_security_group_association" "SGA" {
+resource "azurerm_subnet_network_security_group_association" "SGA-app" {
   subnet_id                 = azurerm_subnet.app_gateway_sub.id
   network_security_group_id = azurerm_network_security_group.appgw.id
 }
-resource "azurerm_subnet_network_security_group_association" "SGA1" {
+resource "azurerm_subnet_network_security_group_association" "SGA-mgmt" {
   subnet_id                 = azurerm_subnet.mgmt_sub.id
   network_security_group_id = azurerm_network_security_group.mgmt.id
 }
-resource "azurerm_subnet_network_security_group_association" "SGA2" {
+resource "azurerm_subnet_network_security_group_association" "SGA-web" {
   subnet_id                 = azurerm_subnet.web_tier_sub.id
   network_security_group_id = azurerm_network_security_group.web.id
 }
-resource "azurerm_subnet_network_security_group_association" "SGA3" {
+resource "azurerm_subnet_network_security_group_association" "SGA-api" {
   subnet_id                 = azurerm_subnet.biz_tier_sub.id
   network_security_group_id = azurerm_network_security_group.api.id
 }
-resource "azurerm_subnet_network_security_group_association" "SGA4" {
+resource "azurerm_subnet_network_security_group_association" "SGA-data" {
   subnet_id                 = azurerm_subnet.data_tier_sub.id
   network_security_group_id = azurerm_network_security_group.data.id
 }
