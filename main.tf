@@ -53,7 +53,7 @@ resource "random_password" "dbpassword" {
 
 resource "azurerm_resource_group" "rg" {
   location = var.resource_group_location
-  name     = random_pet.name.id
+  name     = var.resource_group_name
 }
 
 ######################################

@@ -5,6 +5,10 @@
 # Terraform code. If you create a variable with no default, the user will be
 # prompted to enter it (or define it via config file or command line flags.)
 
+variable "resource_group_name" {
+  description = "Name of the resource group."
+}
+
 variable "resource_group_location" {
   default     = "AustraliaCentral"
   description = "Location of the resource group."
