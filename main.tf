@@ -30,10 +30,15 @@ terraform {
 
 
 provider "azurerm" {
-  features {}
+  features {
+    key_vault {
+      purge_soft_delete_on_destroy = true
+      recover_soft_deleted_key_vaults = false
+    }
+  }
 }
 
-// data "azurerm_client_config" "current" { }
+data "azurerm_client_config" "current" {}
 
 
 resource "random_pet" "name" {
@@ -182,28 +187,51 @@ module "db_SQLSERVER" {
 ##### 
 # Create Keyvault and store secrets in it
 #####
-module "kv" {
-  source              = "./modules/keyvault"
-  name                = random_pet.name.id
-  location            = var.resource_group_location
-  resource_group_name = azurerm_resource_group.rg.name
-  // tenant_id           = data.azurerm_client_config.current.tenant_id
+# module "kv" {
+#   source              = "./modules/keyvault"
+#   name                = random_pet.name.id
+#   location            = var.resource_group_location
+#   resource_group_name = azurerm_resource_group.rg.name
+#   // tenant_id           = data.azurerm_client_config.current.tenant_id
+# }
+
+resource "azurerm_key_vault" "kv" {
+  name                     = "${random_pet.name.id}-kv"
+  location                 = var.resource_group_location
+  resource_group_name      = var.resource_group_name
+  tenant_id                = data.azurerm_client_config.current.tenant_id
+  sku_name                 = "standard"
+  purge_protection_enabled = false
+}
+
+resource "azurerm_key_vault_access_policy" "kvpolicy" {
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id
+
+  secret_permissions = [
+    "Get", "Set", "List", "Delete", "Purge", "Recover"
+  ]
+  lifecycle {
+    ignore_changes = [
+      secret_permissions
+    ]
+  }
 }
 resource "azurerm_key_vault_secret" "vmcred" {
   name         = "vmcred"
   value        = random_password.password.bcrypt_hash
-  key_vault_id = module.kv.id
+  key_vault_id = azurerm_key_vault.kv.id
 
   depends_on = [
-    module.kv.access_policy
+    resource.azurerm_key_vault_access_policy.kvpolicy
   ]
 }
 resource "azurerm_key_vault_secret" "dbcred" {
   name         = "dbcred"
   value        = random_password.dbpassword.result
-  key_vault_id = module.kv.id
-
+  key_vault_id = azurerm_key_vault.kv.id
   depends_on = [
-    module.kv.access_policy
+    azurerm_key_vault_access_policy.kvpolicy
   ]
 }
