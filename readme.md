@@ -5,14 +5,18 @@
 * [Background](#Background)
 	* [When to use this architecture](#Whentousethisarchitecture)
 	* [Consider an N-tier architecture for:](#ConsideranN-tierarchitecturefor:)
-* [Sample N-Tier Deployment using Terraform](#SampleN-TierDeploymentusingTerraform)
+* [A Sample N-Tier Deployment using Terraform](#ASampleN-TierDeploymentusingTerraform)
 * [How to deploy](#Howtodeploy)
-* [Requirements](#Requirements)
-* [Providers](#Providers)
-* [Modules](#Modules)
-* [Resources](#Resources)
-* [Inputs](#Inputs)
-* [Outputs](#Outputs)
+    * [Terraform PlanApply Scaffolding](#TerraformPlanApplyScaffolding)
+	* [Terraform PlanApply DEV and Terraform PlanApply PROD](#TerraformPlanApplyDEVandTerraformPlanApplyPROD)
+	* [Terraform Destroy DEV and Terraform Destroy PROD](#TerraformDestroyDEVandTerraformDestroyPROD)
+* [Terraform State](#TerraformState)
+    * [Requirements](#Requirements)
+    * [Providers](#Providers)
+    * [Modules](#Modules)
+    * [Resources](#Resources)
+    * [Inputs](#Inputs)
+    * [Outputs](#Outputs)
 
 <!-- vscode-markdown-toc-config
 	numbering=false
@@ -26,7 +30,7 @@ This repository contains a reference implementation of an N-tier application, us
 
 Q: Why create another terraform-to-azure demo? A:  We felt that most existing demos did not reflect the complexity that our customers face.  Most existing terraform demos show little more than 'hello world', deploying a single resource to a single environment.  We wanted to create a demo that shows how to deploy a complex application across multiple environments (non-prod, prod).
 
-The terraform code and assests in this repo can be used to showcase:
+The terraform code and assets in this repo can be used to showcase:
 
 * Abstraction of code using modules
 * Reusability of manifests across different environments (non-prod, prod) through tfvars files and multiple workspaces in terraform cloud
@@ -56,7 +60,7 @@ N-tier architectures are often implemented as infrastructure-as-service (IaaS) a
 * Unified development of on-premises and cloud applications.
 * N-tier architectures are very common in traditional on-premises applications, so it's a natural fit for migrating existing workloads to Azure.
 
-## <a name='SampleN-TierDeploymentusingTerraform'></a>A Sample N-Tier Deployment using Terraform
+## <a name='ASampleN-TierDeploymentusingTerraform'></a>A Sample N-Tier Deployment using Terraform
 
 <!-- comment <img width="800" alt="Architecture-diag2" src=https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/images/n-tier-physical-bastion.png> -->
 ![n-tier](arch.drawio.svg)
@@ -81,41 +85,45 @@ A service principal is used to authenticate terraform to azure and is stored in 
 
 The actions used to deploy the application are:
 
-#### Terraform PlanApply Scaffolding
+#### <a name='TerraformPlanApplyScaffolding'></a>Terraform PlanApply Scaffolding
 The workflow **Terraform PlanApply Scaffolding** is used to set up the environment.  It is a 
 'one-and-done' workflow, simply used to approve the licensing of the VM image in the manifests.
 
-#### Terraform PlanApply DEV and Terraform PlanApply PROD
+#### <a name='TerraformPlanApplyDEVandTerraformPlanApplyPROD'></a>Terraform PlanApply DEV and Terraform PlanApply PROD
 The workflows **Terraform PlanApply DEV** and **Terraform PlanApply PROD** are used to, respectively, deploy the application to a DEV and to a PROD environment.
 The specific parameters for DEV and PROD are stored in the tfvars files `dev.terraform.tfvars` and `prod.terraform.tfvars`.  The main difference between the environments is the resource group, which is specified in the files.
 
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-1. Open a cloud Shell from the Azure portal
-2. Clone this repo by running this command:
-```
-git clone https://github.com/dawright22/azure-VM-reference-arch-linux.git
-```
-3. Change into the directory this created
-4. Now copy and Run this command:
-```HCL
-Terraform init
-```
-6. Now copy and Run this command:
- ``` 
- Terraform apply
- ```
+#### <a name='TerraformDestroyDEVandTerraformDestroyPROD'></a>Terraform Destroy DEV and Terraform Destroy PROD
+These workflows tear down the environment.
 
-That's all Fokes! [to quote bugs bunny]
+## <a name='TerraformState'></a>Terraform State
+Terraform state is stored in Terraform cloud.  Each environment gets its own workspace for storing state:
 
-If you want to customise location or other componets then you can start playing with the Variables file to suit you.
+![workspaces](img/workspaces.png)
 
-To access the VM scale sets select the instance you wish to connect to and use the Bastion option as per these instructions https://learn.microsoft.com/en-us/azure/bastion/bastion-connect-vm-scale-set. 
-Enter azureuser as the user and use the generated password from Terraform by running
+The workspaces are all tagged as `azure-vm-ref-arch`, and this is used by the terraform code:
+
+```hcl
+terraform {
+  cloud {
+    organization = "mtc"
+    workspaces {
+      # This will choose all workspaces with this tag.  
+      # You will need to subsequently select the workspace for the run, eg 'terraform workspace select prod'
+      # or you will need to set the TF_WORKSPACE env variable
+      tags = ["azure-vm-ref-arch"]
+    }
+  }
 ```
-terraform output password
+Then, within the workflow, the specific workspace is selected:
+```yaml
+env:
+  # Per https://developer.hashicorp.com/terraform/cli/config/environment-variables
+  TF_WORKSPACE: 'vm-ref-arch-scaffold'
 ```
-in your cloud shell session.
+
 -----------------
+# Terraform Module Documentation
 
 ## <a name='Requirements'></a>Requirements
 
