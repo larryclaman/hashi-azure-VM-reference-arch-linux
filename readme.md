@@ -4,7 +4,6 @@
 * [Purpose](#Purpose)
 * [Background](#Background)
 	* [When to use this architecture](#Whentousethisarchitecture)
-	* [Consider an N-tier architecture for:](#ConsideranN-tierarchitecturefor:)
 * [A Sample N-Tier Deployment using Terraform](#ASampleN-TierDeploymentusingTerraform)
 * [How to deploy](#Howtodeploy)
     * [Terraform PlanApply Scaffolding](#TerraformPlanApplyScaffolding)
@@ -53,7 +52,7 @@ A traditional three-tier application has a presentation tier, a middle tier, and
 
 N-tier architectures are often implemented as infrastructure-as-service (IaaS) applications, with each tier running on a separate set of VMs. However, an N-tier application doesn't need to be pure IaaS. Often, it's advantageous to use managed services for some parts of the architecture, particularly caching, messaging, and data storage.
 
-### <a name='ConsideranN-tierarchitecturefor:'></a>Consider an N-tier architecture for:
+Consider an N-tier architecture for:
 
 * Simple web applications.
 * Migrating an on-premises application to Azure with minimal refactoring.
@@ -64,6 +63,7 @@ N-tier architectures are often implemented as infrastructure-as-service (IaaS) a
 
 <!-- comment <img width="800" alt="Architecture-diag2" src=https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/images/n-tier-physical-bastion.png> -->
 ![n-tier](arch.drawio.svg)
+
 The code in this repo deploys an illustrative application across a reference environment. The code creates the following components:
 
 * Two VNETs; one for the application and one for a Bastion Host.  These VNETs are peered.  
@@ -73,7 +73,7 @@ The code in this repo deploys an illustrative application across a reference env
 * A load balancer in front of an API tier VMSS (with autoscaling rules).  This tier makes calls to:
 * Azure SQL.  Credentials are stored in an Azure Key Vault
 
-The sample application being deployed is the [YADA Application](https://github.com/microsoft/YADA)
+The sample application being deployed is the [YADA Application](https://github.com/microsoft/YADA).
 
 ## <a name='Howtodeploy'></a>How to deploy
 
